@@ -54,7 +54,8 @@
         left: 0;
         top: 0;
         width: 100vw;
-        height: 100vh;
+        height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+  		height: calc(var(--vh, 1vh) * 100);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -102,8 +103,9 @@
 
   <script src="Build/UnityLoader.js"></script>
   <script>
+  	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   	// I got this code from: https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
-  	// it resizes the gameContainer to properly fit height on mobile devices with toolbars and safe area
+  	// It resizes the gameContainer to properly fit height on mobile devices with toolbars and safe area
   	// First we get the viewport height and we multiple it by 1% to get a value for a vh unit
 	let vh = window.innerHeight * 0.01;
 	// Then we set the value in the --vh custom property to the root of the document
@@ -114,6 +116,14 @@
   		let vh = window.innerHeight * 0.01;
   		document.documentElement.style.setProperty('--vh', `${vh}px`);
 	});
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// I got this code from: https://www.dusterwald.com/2019/07/webgl-and-unity-in-2019/
+	// It disables the warning about WebGL not working in mobile Safari
+	UnityLoader.Error.Handler = function() {};
+	UnityLoader.compatibilityCheck = function(e,t,r) { t(); };
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   	var gameInstance = UnityLoader.instantiate("gameContainer", "Build/WebGL.json", {onProgress: UnityProgress});
   	function UnityProgress(gameInstance, progress) {
