@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Distract.Live</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        background: #444;
+      }
+      #gameContainer {
+        width: 100vw;
+        height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+  		height: calc(var(--vh, 1vh) * 100);
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      /* try to handle mobile dialog */
+      canvas + * {
+        z-index: 2;
+      }
+      .logo {
+          display: block;
+          max-width: 50vw;
+          max-height: 35vh;
+      }
+
+      .progress {
+          margin: 1.5em;
+          border: 1px solid white;
+          width: 50vw;
+          display: none;
+      }
+      .progress .full {
+          margin: 2px;
+          background: white;
+          height: 1em;
+          transform-origin: top left;
+      }
+
+      #loader {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+  		height: calc(var(--vh, 1vh) * 100);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .spinner,
+      .spinner:after {
+        border-radius: 50%;
+        width: 5em;
+        height: 5em;
+      }
+      .spinner {
+        margin: 10px;
+        font-size: 10px;
+        position: relative;
+        text-indent: -9999em;
+        border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-left: 1.1em solid #ffffff;
+        transform: translateZ(0);
+        animation: spinner-spin 1.1s infinite linear;
+      }
+      @keyframes spinner-spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="gameContainer"></div>
+    <div id="loader">
+      <img class="logo" src="logo.png">
+      <div class="spinner"></div>
+      <div class="progress"><div class="full"></div></div>
+    </div>
+  </body>
+
+  <script src="Build/UnityLoader.js"></script>
+  <script>
+  	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  	// I got this code from: https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
+  	// It resizes the gameContainer to properly fit height on mobile devices with toolbars and safe area
+  	// First we get the viewport height and we multiple it by 1% to get a value for a vh unit
+	let vh = window.innerHeight * 0.01;
+	// Then we set the value in the --vh custom property to the root of the document
+	document.documentElement.style.setProperty('--vh', `${vh}px`);
+	// We listen to the resize event
+	window.addEventListener('resize', () => {
+  		// We execute the same script as before
+  		let vh = window.innerHeight * 0.01;
+  		document.documentElement.style.setProperty('--vh', `${vh}px`);
+	});
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// I got this code from: https://www.dusterwald.com/2019/07/webgl-and-unity-in-2019/
+	// It disables the warning about WebGL not working in mobile Safari
+	UnityLoader.Error.Handler = function() {};
+	UnityLoader.compatibilityCheck = function(e,t,r) { t(); };
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  	var gameInstance = UnityLoader.instantiate("gameContainer", "Build/WebGL.json", {onProgress: UnityProgress});
+  	function UnityProgress(gameInstance, progress) {
+    	if (!gameInstance.Module) {
+      		return;
+    	}
+    	const loader = document.querySelector("#loader");
+   		if (!gameInstance.progress) {
+      		const progress = document.querySelector("#loader .progress");
+      		progress.style.display = "block";
+      		//progress.style.display = "none";
+      		gameInstance.progress = progress.querySelector(".full");
+      		//loader.querySelector(".spinner").style.display = "none";
+    	}
+    	gameInstance.progress.style.transform = `scaleX(${progress})`;
+    	if (progress === 1 && !gameInstance.removeTimeout) {
+      		loader.style.display = "none";
+      		//gameInstance.removeTimeout = setTimeout(function() {
+      		//    loader.style.display = "none";
+      		//}, 2000);
+    	}
+  	}
+  </script>
+
+</html>
